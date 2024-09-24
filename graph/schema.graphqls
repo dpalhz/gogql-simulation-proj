@@ -1,0 +1,30 @@
+scalar Time
+
+type Note {
+  id: String!
+  title: String!
+  body: String!
+  createdAt: Time!
+  user: User!
+}
+
+type User {
+  id: String!
+  name: String!
+  username: String!
+  password: String!
+  notes: [Note!]!
+}
+
+type Query {
+  getNotes: [Note!]!
+  getNoteById(id: String!): Note
+  getUserById(id: String!): User
+}
+
+type Mutation {
+  addNote(title: String!, body: String!, userId: String!): Note!
+  updateNote(id: String!, title: String, body: String): Note!
+  deleteNote(id: String!): String!
+  createUser(name: String!, username: String!, password: String!): User!
+}
