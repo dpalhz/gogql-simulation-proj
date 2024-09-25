@@ -6,6 +6,11 @@ import (
 	"time"
 )
 
+type AuthPayload struct {
+	Token string `json:"token"`
+	User  *User  `json:"user"`
+}
+
 type Mutation struct {
 }
 
@@ -14,6 +19,7 @@ type Note struct {
 	Title     string    `json:"title"`
 	Body      string    `json:"body"`
 	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
 	User      *User     `json:"user"`
 }
 
@@ -21,9 +27,10 @@ type Query struct {
 }
 
 type User struct {
-	ID       string  `json:"id"`
-	Name     string  `json:"name"`
-	Username string  `json:"username"`
-	Password string  `json:"password"`
-	Notes    []*Note `json:"notes"`
+	ID        string    `json:"id"`
+	Name      string    `json:"name"`
+	Username  string    `json:"username"`
+	Password  string    `json:"password"`
+	CreatedAt time.Time `json:"createdAt"`
+	Notes     []*Note   `json:"notes"`
 }

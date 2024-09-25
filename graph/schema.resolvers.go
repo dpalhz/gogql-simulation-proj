@@ -9,7 +9,10 @@ import (
 	"fmt"
 	"notes/graph/model"
 	"notes/models"
+	"notes/utils"
 	"time"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 // AddNote is the resolver for the addNote field.
@@ -24,7 +27,7 @@ func (r *mutationResolver) AddNote(ctx context.Context, title string, body strin
 		Title:     title,
 		Body:      body,
 		CreatedAt: time.Now(),
-		UserID:    user.ID, // Menetapkan ID pengguna ke UserID
+		UserID:    user.ID,
 	}
 
 	// Simpan note ke database
@@ -34,19 +37,17 @@ func (r *mutationResolver) AddNote(ctx context.Context, title string, body strin
 
 	// Konversi note GORM ke model GraphQL
 	return &model.Note{
-		ID:        note.ID.String(), // Mengonversi UUID ke string
+		ID:        note.ID.String(),
 		Title:     note.Title,
 		Body:      note.Body,
 		CreatedAt: note.CreatedAt,
-        User: &model.User{ // Isi user dengan data pengguna yang diambil dari DB
-            ID:       user.ID.String(), 
-            Name:     user.Name,
-            Username: user.Username,
-        },
+		User: &model.User{ // Isi user dengan data pengguna yang diambil dari DB
+			ID:       user.ID.String(),
+			Name:     user.Name,
+			Username: user.Username,
+		},
 	}, nil
 }
-
-
 
 // UpdateNote is the resolver for the updateNote field.
 func (r *mutationResolver) UpdateNote(ctx context.Context, id string, title *string, body *string) (*model.Note, error) {
@@ -75,50 +76,101 @@ func (r *mutationResolver) UpdateNote(ctx context.Context, id string, title *str
 		Title:     note.Title,
 		Body:      note.Body,
 		CreatedAt: note.CreatedAt,
+		UpdatedAt: note.UpdatedAt,
 		User:      &model.User{ID: note.UserID.String()}, // Jika ingin menampilkan pengguna
 	}, nil
 }
 
 // DeleteNote is the resolver for the deleteNote field.// DeleteNote is the resolver for the deleteNote field.
 func (r *mutationResolver) DeleteNote(ctx context.Context, id string) (string, error) {
-    // Cek apakah note dengan ID yang diberikan ada
-    var note models.Note
-    if err := r.DB.First(&note, "id = ?", id).Error; err != nil {
-        return "", fmt.Errorf("note not found: %v", err)
-    }
+	// Cek apakah note dengan ID yang diberikan ada
+	var note models.Note
+	if err := r.DB.First(&note, "id = ?", id).Error; err != nil {
+		return "", fmt.Errorf("note not found: %v", err)
+	}
 
-    // Hapus catatan dari database
-    if err := r.DB.Delete(&note).Error; err != nil {
-        return "", fmt.Errorf("failed to delete note: %v", err)
-    }
+	if err := r.DB.Delete(&note).Error; err != nil {
+		return "", fmt.Errorf("failed to delete note: %v", err)
+	}
 
-    // Kembalikan ID catatan yang dihapus sebagai konfirmasi
-    return id, nil
+	return id, nil
 }
 
+// Register is the resolver for the register field.
+func (r *mutationResolver) Register(ctx context.Context, name string, username string, password string) (*model.AuthPayload, error) {
+	var user models.User
 
-// CreateUser is the resolver for the createUser field.
-func (r *mutationResolver) CreateUser(ctx context.Context, name string, username string, password string) (*model.User, error) {
-    user := &models.User{
-        Name:     name,
-        Username: username,
-        Password: password, // Jangan lupa untuk meng-hash password
-    }
+	// Periksa apakah username sudah ada
+	if err := r.DB.First(&user, "username = ?", username).Error; err == nil {
+		return nil, fmt.Errorf("username already taken")
+	}
 
-    // Simpan pengguna ke database
-    if err := r.DB.Create(user).Error; err != nil {
-        return nil, err
-    }
+	// Hash password
+	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return nil, fmt.Errorf("failed to hash password: %v", err)
+	}
 
-    // Konversi user GORM ke model GraphQL
-    return &model.User{
-        ID:       user.ID.String(), // Mengonversi UUID ke string
-        Name:     user.Name,
-        Username: user.Username,
-        Password: user.Password, // Hati-hati dengan pengembalian password
-    }, nil
+	user = models.User{
+		Name:     name,
+		Username: username,
+		Password: string(hash),
+	}
+
+	// Simpan pengguna ke database
+	if err := r.DB.Create(&user).Error; err != nil {
+		return nil, err
+	}
+
+	// Buat token UUID
+	token := utils.GenerateUUID()
+
+	// Kembalikan AuthPayload
+	return &model.AuthPayload{
+		Token: token,
+		User: &model.User{
+			ID:       user.ID.String(),
+			Name:     user.Name,
+			Username: user.Username,
+		},
+	}, nil
 }
 
+// Login is the resolver for the login field.
+func (r *mutationResolver) Login(ctx context.Context, username string, password string) (*model.AuthPayload, error) {
+	var user models.User
+
+	// Ambil pengguna berdasarkan username
+	if err := r.DB.First(&user, "username = ?", username).Error; err != nil {
+		return nil, fmt.Errorf("invalid credentials: %v", err)
+	}
+
+	// Periksa password
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
+		return nil, fmt.Errorf("invalid credentials: %v", err)
+	}
+
+	// Buat token UUID
+	token := utils.GenerateUUID()
+	// Kembalikan AuthPayload
+	return &model.AuthPayload{
+		Token: token,
+		User: &model.User{
+			ID:       user.ID.String(),
+			Name:     user.Name,
+			Username: user.Username,
+		},
+	}, nil
+}
+
+// Logout is the resolver for the logout field.
+func (r *mutationResolver) Logout(ctx context.Context) (bool, error) {
+	// Logika logout bisa bervariasi tergantung pada implementasi token
+	// Jika menggunakan stateful sessions, hapus token dari store
+	// Untuk JWT, tidak ada tindakan khusus yang diperlukan di server
+
+	return true, nil
+}
 
 // GetNotes is the resolver for the getNotes field.
 func (r *queryResolver) GetNotes(ctx context.Context) ([]*model.Note, error) {
@@ -135,23 +187,21 @@ func (r *queryResolver) GetNotes(ctx context.Context) ([]*model.Note, error) {
 			Title:     note.Title,
 			Body:      note.Body,
 			CreatedAt: note.CreatedAt,
-			User:      &model.User{ID: note.UserID.String()}, // Jika ingin menampilkan pengguna
+			User:      &model.User{ID: note.UserID.String()},
 		}
 	}
 
 	return result, nil
 }
 
-
 // GetNoteByID is the resolver for the getNoteById field.
 func (r *queryResolver) GetNoteByID(ctx context.Context, id string) (*model.Note, error) {
-    var note model.Note
-    if err := r.DB.First(&note, "id = ?", id).Error; err != nil {
-        return nil, fmt.Errorf("note not found: %v", err)
-    }
-    return &note, nil
+	var note model.Note
+	if err := r.DB.First(&note, "id = ?", id).Error; err != nil {
+		return nil, fmt.Errorf("note not found: %v", err)
+	}
+	return &note, nil
 }
-
 
 // GetUserByID is the resolver for the getUserById field.// GetUserByID is the resolver for the getUserById field.
 func (r *queryResolver) GetUserByID(ctx context.Context, id string) (*model.User, error) {
@@ -164,10 +214,9 @@ func (r *queryResolver) GetUserByID(ctx context.Context, id string) (*model.User
 		ID:       user.ID.String(),
 		Name:     user.Name,
 		Username: user.Username,
-		Password: user.Password, // Hati-hati dengan pengembalian password
+		Password: user.Password,
 	}, nil
 }
-
 
 // Mutation returns MutationResolver implementation.
 func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
