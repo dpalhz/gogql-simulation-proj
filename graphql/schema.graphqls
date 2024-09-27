@@ -1,0 +1,41 @@
+scalar Time
+scalar UUID
+
+type Note {
+  id: UUID!
+  title: String!
+  body: String!
+  createdAt: Time!
+  updatedAt: Time!
+  user: User!
+}
+
+type User {
+  id: UUID!
+  name: String!
+  username: String!
+  password: String!
+  createdAt: Time!
+  notes: [Note!]!
+}
+
+type AuthPayload {
+  user: User!
+}
+
+type Query {
+  getNotes: [Note!]!
+  getNoteById(id: UUID!): Note
+  getUserById(id: UUID!): User
+}
+
+type Mutation {
+  addNote(title: String!, body: String!, userId: UUID!): Note!
+  updateNote(id: UUID!, title: String, body: String): Note!
+  deleteNote(id: UUID!): String!
+
+  # Authentication-related mutations
+  register(name: String!, username: String!, password: String!): AuthPayload!
+  login(username: String!, password: String!): AuthPayload!
+  logout: Boolean!
+}

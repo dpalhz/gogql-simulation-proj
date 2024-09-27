@@ -1,0 +1,18 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres
+    container_name: notes-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: gogql
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis
+    container_name: notes-redis
+    ports:
+      - "6379:6379"
