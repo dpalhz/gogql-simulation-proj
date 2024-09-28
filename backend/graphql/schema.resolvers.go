@@ -9,9 +9,9 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"notes/graphql/model"
-	"notes/models"
-	"notes/utils"
+	"notes/backend/graphql/model"
+	"notes/backend/models"
+	"notes/backend/utils"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
@@ -155,7 +155,6 @@ func (r *mutationResolver) Login(ctx context.Context, username string, password 
 	log.Println("masuk ke login prosess")
 
 	utils.SetSession(ctx.Value("responseWriter").(http.ResponseWriter), user.ID.String())
-
 
 	// Kembalikan AuthPayload
 	return &model.AuthPayload{
