@@ -2,6 +2,8 @@ package main
 
 import (
 	"net/http"
+	"notes/backend/graphql"
+	"notes/backend/graphql/resolver"
 	log "notes/backend/internal/logger"
 	"os"
 
@@ -13,7 +15,6 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 
-	"notes/backend/graphql"
 	"notes/backend/models"
 	"notes/backend/utils"
 )
@@ -58,7 +59,7 @@ func main() {
 	}))
 
 	// Create a new Resolver with the database connection
-	resolver := graphql.NewResolver(db)
+	resolver := resolver.NewResolver(db)
 
 	// Create a new GraphQL server
 	srv := handler.NewDefaultServer(graphql.NewExecutableSchema(graphql.Config{Resolvers: resolver}))

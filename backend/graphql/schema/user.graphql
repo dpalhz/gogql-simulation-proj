@@ -1,0 +1,18 @@
+type User {
+  id: UUID!
+  name: String!
+  username: String!
+  password: String!
+  notes: [Note!]!
+  createdAt: Time!
+}
+
+extend type Query {
+  getUserById(id: UUID!): User
+}
+
+extend type Mutation {
+  register(name: String!, username: String!, password: String!): User!
+  login(username: String!, password: String!): User!
+  logout: Boolean!
+}

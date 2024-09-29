@@ -6,30 +6,16 @@ import (
 	"time"
 )
 
-type AuthPayload struct {
-	User *User `json:"user"`
-}
-
 type Mutation struct {
-}
-
-type Note struct {
-	ID        string    `json:"id"`
-	Title     string    `json:"title"`
-	Body      string    `json:"body"`
-	CreatedAt time.Time `json:"createdAt"`
-	UpdatedAt time.Time `json:"updatedAt"`
-	User      *User     `json:"user"`
 }
 
 type Query struct {
 }
 
-type User struct {
+type Test struct {
 	ID        string    `json:"id"`
-	Name      string    `json:"name"`
-	Username  string    `json:"username"`
-	Password  string    `json:"password"`
+	Title     string    `json:"title"`
+	Body      string    `json:"body"`
 	CreatedAt time.Time `json:"createdAt"`
-	Notes     []*Note   `json:"notes"`
+	UpdatedAt time.Time `json:"updatedAt"`
 }

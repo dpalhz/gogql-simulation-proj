@@ -1,0 +1,19 @@
+type Note {
+  id: UUID!
+  title: String!
+  body: String!
+  createdAt: Time!
+  updatedAt: Time!
+  user: User!
+}
+
+extend type Query {
+  getNotes: [Note!]!
+  getNoteById(id: UUID!): Note
+}
+
+extend type Mutation {
+  addNote(title: String!, body: String!, userId: UUID!): Note!
+  updateNote(id: UUID!, title: String, body: String): Note!
+  deleteNote(id: UUID!): String!
+}

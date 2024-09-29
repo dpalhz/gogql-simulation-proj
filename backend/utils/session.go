@@ -75,15 +75,15 @@ func SetSession(w http.ResponseWriter, userID string) {
 func GetSession(r *http.Request) (*Session, error) {
 	cookie, err := r.Cookie("session_id")
 	if err != nil {
-		return nil, err // Kembalikan error jika cookie tidak ada
+		return nil, err 
 	}
 
 	sessionID := cookie.Value
 	sessionData, err := rdb.Get(context.Background(), sessionID).Result()
 	if err == redis.Nil {
-		return nil, fmt.Errorf("session does not exist") // Jika sesi tidak ada
+		return nil, fmt.Errorf("session does not exist")
 	} else if err != nil {
-		return nil, err // Kembalikan error jika terjadi kesalahan
+		return nil, err 
 	}
 
 	var session Session
@@ -130,11 +130,10 @@ func SessionMiddleware(next http.Handler) http.Handler {
 }
 
 func generateSessionID() string {
-	return uuid.New().String() // Menghasilkan UUID sebagai session ID
+	return uuid.New().String() 
 }
 
 func isLoginOrRegisterOperation(body string) bool {
-	// Simple check for mutation operation containing login or register
 	return strings.Contains(body, "mutation") &&
 		(strings.Contains(body, "Login") || strings.Contains(body, "Register"))
 }

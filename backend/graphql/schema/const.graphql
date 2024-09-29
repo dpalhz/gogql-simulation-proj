@@ -1,0 +1,22 @@
+scalar Time
+scalar UUID
+
+type Query {
+  _empty: String
+}
+
+type Mutation {
+  _empty: String
+}
+
+type Test {
+  id: UUID!
+  title: String!
+  body: String!
+  createdAt: Time!
+  updatedAt: Time!
+}
+
+extend type Query {
+  getTest: [Test!]!
+}
