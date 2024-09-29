@@ -25,6 +25,11 @@ To install Golang, you can go to their [Official Website](https://go.dev/dl/). C
 - [Linux](https://go.dev/dl/go1.23.1.linux-amd64.tar.gz).
 - [Build from source](https://go.dev/dl/go1.23.1.src.tar.gz).
 
+Getting started with Golang:
+
+- First, create your project folder. In Linux, you can go to the terminal and type `mkdir <new_folder>`.
+- Go to the project folder, and initialize new Golang project with command `go mod init <your_module_name>`.
+
 ### 2. Fiber
 
 According to the Website:
@@ -72,7 +77,7 @@ func main() {
 
 ### 3. Gorm
 
-Gorm is one of the popular ORM (Object Relation Mapping) in Golang.
+Gorm is one of the popular ORM (Object Relation Mapping) in Golang that simplifies database interactions.
 
 **So, why we choose Gorm?**
 
@@ -125,11 +130,17 @@ The generated schemas and resolvers will looks like this:
 └── schema.resolvers.go
 ```
 
-If you want to modify and adjust GraphQL folder structure based on your needs, you can edit `gqlgen.yaml` file that located in your root project.
+If you want to modify and adjust GraphQL folder structure based on your needs, you can edit `gqlgen.yml` file that located in your root project.
 
 ### 5. PostgreSQL
 
-Description: WIP
+To install PostgreSQL, you can download the packages and installers in their [Official Website](https://www.postgresql.org/download/). Choose based on your Operating Systems. Available options:
+
+- [Linux](https://www.postgresql.org/download/linux/).
+- [Mac OS](https://www.postgresql.org/download/macosx/).
+- [Windows](https://www.postgresql.org/download/windows/).
+- [BSD](https://www.postgresql.org/download/bsd/).
+- [Solaris](https://www.postgresql.org/download/solaris/).
 
 **How to install and setup PostgreSQL in your Golang Project?**
 
@@ -194,9 +205,15 @@ func main() {
 
 ### 6. Redis
 
-Description: WIP
+To install Redis, you can see the detail instructions in their [Official Website](https://redis.io/docs/latest/operate/oss_and_stack/install/install-redis/). Available options:
 
-**How to install Redis in your Golang Project?**
+- [Windows](https://redis.io/docs/latest/operate/oss_and_stack/install/install-redis/install-redis-on-windows/).
+- [Linux](https://redis.io/docs/latest/operate/oss_and_stack/install/install-redis/install-redis-on-linux/).
+- [MacOS](https://redis.io/docs/latest/operate/oss_and_stack/install/install-redis/install-redis-on-mac-os/).
+- [Build from source](https://redis.io/docs/latest/operate/oss_and_stack/install/install-redis/install-redis-from-source/).
+- [With Redis Stack](https://redis.io/docs/latest/operate/oss_and_stack/install/install-stack/).
+
+**How to install and setup Redis in your Golang Project?**
 
 You can install and implement Redis to your Go project using [go-redis](https://github.com/redis/go-redis).
 
@@ -204,6 +221,56 @@ You can install and implement Redis to your Go project using [go-redis](https://
 go get github.com/redis/go-redis/v9
 ```
 
+Initialize Redis
+
+```go
+func InitRedis(addr string, password string) (*redis.Client, error) {
+	rdb = redis.NewClient(&redis.Options{
+		Addr:     addr,
+		Password: password,
+		DB:       0,
+	})
+
+	// Test the connection
+	ctx := context.Background()
+	_, err := rdb.Ping(ctx).Result()
+	if err != nil {
+		return nil, fmt.Errorf("failed to connect to Redis: %v", err)
+	}
+
+	// Reset database
+	err = rdb.FlushDB(ctx).Err()
+	if err != nil {
+		return nil, fmt.Errorf("failed to reset Redis database: %v", err)
+	}
+
+	return rdb, nil
+}
+```
+
+See [session.go](https://github.com/dpalhz/gogql-simulation-proj/blob/main/backend/utils/session.go) file for more detail.
+
 ### 7. Air
 
-Description: WIP
+Air is a live reloading tool designed to streamline the development process of your Golang project. Air automatically watch your codebase changes and reloads the applications without manual stop.
+
+**How to install Air?**
+
+There are some options to install Air.
+
+- Using `go install`
+
+  ```sh
+  go install github.com/cosmtrek/air@latest
+  ```
+
+- Via install.sh
+
+  ```sh
+  curl -fLo ./air https://raw.githubusercontent.com/cosmtrek/air/master/bin/install
+  chmod +x ./air
+  ```
+
+**Usage**
+
+Work in progress.
