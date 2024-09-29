@@ -25,7 +25,7 @@ To install Golang, you can go to their [Official Website](https://go.dev/dl/). C
 - [Linux](https://go.dev/dl/go1.23.1.linux-amd64.tar.gz).
 - [Build from source](https://go.dev/dl/go1.23.1.src.tar.gz).
 
-Getting started with Golang:
+**Getting started with Golang:**
 
 - First, create your project folder. In Linux, you can go to the terminal and type `mkdir <new_folder>`.
 - Go to the project folder, and initialize new Golang project with command `go mod init <your_module_name>`.
@@ -61,17 +61,17 @@ import (
 )
 
 type Response struct {
-    Message string
+  Message string
 }
 
 func main() {
-    app := fiber.New()
+  app := fiber.New()
 
-	app.Get("/", func(c *fiber.Ctx) error {
-		return c.JSON(Response{
-            Message: "Sukses mengakses API!",
-        })
-	})
+  app.Get("/", func(c *fiber.Ctx) error {
+    return c.JSON(Response{
+      Message: "Sukses mengakses API!",
+    })
+  })
 }
 ```
 
@@ -91,6 +91,8 @@ Gorm is one of the popular ORM (Object Relation Mapping) in Golang that simplifi
 ```sh
 go get -u gorm.io/gorm
 ```
+
+For setup, we integrate Gorm with PostgreSQL. Go to [setup with PostgreSQL](#5-postgresql).
 
 ### 4. GraphQL with `gqlgen`
 
@@ -149,15 +151,27 @@ Because we are using Gorm as our ORM, we don't need to install any additional pa
 **Connect to Database example:**
 
 ```go
+package configs
+
 import (
-  "gorm.io/driver/postgres"
-  "gorm.io/gorm"
+	"log"
+	"os"
+
+	_ "github.com/joho/godotenv/autoload"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
-dsn := "host=<your_host, localhost/127.0.0.1/0.0.0.0> user=<your_db_username> password=<your_db_password> dbname=<your_db_name> port=<your_port, normally in 5432> sslmode=disable"
-db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-if err != nil {
-	log.LogFatalf("failed to connect database: %v", err)
+func Gorm() *gorm.DB {
+  dsn := "host=<your_host, localhost/127.0.0.1/0.0.0.0> user=<your_db_username> password=<your_db_password> dbname=<your_db_name> port=<your_port, normally in 5432> sslmode=disable"
+
+	db, err := gorm.Open(postgres.New(postgres.Config(dsn)), &gorm.Config{})
+
+	if err != nil {
+		log.Fatalln("Error while load from Database!", err)
+	}
+
+  return db
 }
 ```
 
@@ -221,7 +235,7 @@ You can install and implement Redis to your Go project using [go-redis](https://
 go get github.com/redis/go-redis/v9
 ```
 
-Initialize Redis
+**Initialize Redis:**
 
 ```go
 func InitRedis(addr string, password string) (*redis.Client, error) {
@@ -252,7 +266,7 @@ See [session.go](https://github.com/dpalhz/gogql-simulation-proj/blob/main/backe
 
 ### 7. Air
 
-Air is a live reloading tool designed to streamline the development process of your Golang project. Air automatically watch your codebase changes and reloads the applications without manual stop.
+Air is a live reloading tool designed to streamline the development process of our Golang project. Air automatically watch our codebase changes and reloads the applications without manual stop.
 
 **How to install Air?**
 
@@ -271,6 +285,63 @@ There are some options to install Air.
   chmod +x ./air
   ```
 
-**Usage**
+**Getting started with Air:**
 
-Work in progress.
+- Initialize new Air config with `air init`. The default configurations of `.air.toml` file will looks like this:
+
+  ```toml
+  root = "."
+  testdata_dir = "testdata"
+  tmp_dir = "tmp"
+
+  [build]
+    args_bin = []
+    bin = "./tmp/main"
+    cmd = "go build -o ./tmp/main ."
+    delay = 1000
+    exclude_dir = ["assets", "tmp", "vendor", "testdata"]
+    exclude_file = []
+    exclude_regex = ["_test.go"]
+    exclude_unchanged = false
+    follow_symlink = false
+    full_bin = ""
+    include_dir = []
+    include_ext = ["go", "tpl", "tmpl", "html"]
+    include_file = []
+    kill_delay = "0s"
+    log = "build-errors.
+  .log"
+    poll = false
+    poll_interval = 0
+    post_cmd = []
+    pre_cmd = []
+    rerun = false
+    rerun_delay = 500
+    send_interrupt = false
+    stop_on_error = false
+
+  [color]
+    app = ""
+    build = "yellow"
+    main = "magenta"
+    runner = "green"
+    watcher = "cyan"
+
+  [log]
+    main_only = false
+    time = false
+
+  [misc]
+    clean_on_exit = false
+
+  [proxy]
+    app_port = 0
+    enabled = false
+    proxy_port = 0
+
+  [screen]
+    clear_on_rebuild = false
+    keep_scroll = true
+  ```
+
+- Run the project with command `air`
