@@ -3,15 +3,50 @@
   <p>This repo is for research and experiment purpose</p>
 </div>
 
-## Technologies
+## Contents
+- [Getting Started](#getting-started)
+  - [Installation](#installation)
+  - [Runnning the Applicaiton](#running-the-application)
+- [Setup all stuff from scratch](#setup-all-stuff-from-scratch)
+  - [Golang](#golang)
+  - [Fiber](#fiber)
+  - [Gorm](#gorm)
+  - [GraphQL with `gqlgen`](#graphql-with-gqlgen)
+  - [PostgreSQL](#postgresql)
+  - [Redis](#redis)
+  - [Air](#air)
 
-- Golang
-- Fiber
-- Gorm
-- GraphQL with `gqlgen`
-- PostgreSQL
-- Redis
-- Air
+## Getting Started
+
+### Installation
+1. Clone the repo
+```sh
+git clone https://github.com/dpalhz/gogql-simulation-proj.git
+```
+2. Change into project directory
+```sh
+cd gogql-simulation-proj
+```
+3. Install Go dependencies
+```sh
+go mod download
+```
+4. Install Air (optional, for live reloading)
+```sh
+go install github.com/cosmtrek/air@latest
+```
+
+### Running the Application
+1. Without air
+```sh
+go run backend/cmd/server/server.go
+```
+2. With Air (for live reloading)
+```sh
+air
+```
+
+The GraphQL playground will be available at ```http://localhost:8080/```.
 
 ## Setup all stuff from scratch
 
@@ -29,6 +64,8 @@ To install Golang, you can go to their [Official Website](https://go.dev/dl/). C
 
 - First, create your project folder. In Linux, you can go to the terminal and type `mkdir <new_folder>`.
 - Go to the project folder, and initialize new Golang project with command `go mod init <your_module_name>`.
+
+**[⬆ back to top](#contents)**
 
 ### 2. Fiber
 
@@ -75,6 +112,8 @@ func main() {
 }
 ```
 
+**[⬆ back to top](#contents)**
+
 ### 3. Gorm
 
 Gorm is one of the popular ORM (Object Relation Mapping) in Golang that simplifies database interactions.
@@ -93,6 +132,8 @@ go get -u gorm.io/gorm
 ```
 
 For setup, we integrate Gorm with PostgreSQL. Go to [setup with PostgreSQL](#5-postgresql).
+
+**[⬆ back to top](#contents)**
 
 ### 4. GraphQL with `gqlgen`
 
@@ -133,6 +174,8 @@ The generated schemas and resolvers will looks like this:
 ```
 
 If you want to modify and adjust GraphQL folder structure based on your needs, you can edit `gqlgen.yml` file that located in your root project.
+
+**[⬆ back to top](#contents)**
 
 ### 5. PostgreSQL
 
@@ -217,6 +260,8 @@ func main() {
 }
 ```
 
+**[⬆ back to top](#contents)**
+
 ### 6. Redis
 
 To install Redis, you can see the detail instructions in their [Official Website](https://redis.io/docs/latest/operate/oss_and_stack/install/install-redis/). Available options:
@@ -263,6 +308,8 @@ func InitRedis(addr string, password string) (*redis.Client, error) {
 ```
 
 See [session.go](https://github.com/dpalhz/gogql-simulation-proj/blob/main/backend/utils/session.go) file for more detail.
+
+**[⬆ back to top](#contents)**
 
 ### 7. Air
 
@@ -345,3 +392,5 @@ There are some options to install Air.
   ```
 
 - Run the project with command `air`
+
+**[⬆ back to top](#contents)**
