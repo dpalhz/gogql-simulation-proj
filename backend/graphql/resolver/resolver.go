@@ -1,18 +1,15 @@
 package resolver
 
-import (
-	"gorm.io/gorm"
-)
+import "notes/backend/services"
 
-// Resolver is the main struct for the GraphQL resolver
+// Resolver holds the grouped services
 type Resolver struct {
-	DB *gorm.DB // Menyimpan instance GORM DB untuk digunakan di resolver
+	Services *services.Services
 }
 
-// NewResolver initializes a new Resolver
-func NewResolver(db *gorm.DB) *Resolver {
+// NewResolver initializes a Resolver with the grouped services.
+func NewResolver(services *services.Services) *Resolver {
 	return &Resolver{
-		DB: db,
+		Services: services,
 	}
 }
-

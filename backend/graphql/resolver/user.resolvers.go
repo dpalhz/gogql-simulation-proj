@@ -6,80 +6,63 @@ package resolver
 
 import (
 	"context"
-	"fmt"
 	graphql1 "notes/backend/graphql"
 	"notes/backend/models"
-
-	"golang.org/x/crypto/bcrypt"
+	"notes/backend/utils"
 )
 
 // Register is the resolver for the register field.
 func (r *mutationResolver) Register(ctx context.Context, name string, username string, password string) (*models.User, error) {
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+
+	user, err := r.Services.UserService.RegisterUser(name, username, password)
 	if err != nil {
-		return nil, fmt.Errorf("failed to hash password: %v", err)
-	}
-
-	user := &models.User{
-		Name:     name,
-		Username: username,
-		Password: string(hashedPassword),
-	}
-
-	if err := r.DB.Create(user).Error; err != nil {
-		return nil, fmt.Errorf("failed to create user: %v", err)
+		return nil, err
 	}
 
 	return user, nil
 }
 
-// Login is the resolver for the login field.
+
 func (r *mutationResolver) Login(ctx context.Context, username string, password string) (*models.User, error) {
-	var user models.User
 
-	if err := r.DB.Where("username = ?", username).First(&user).Error; err != nil {
-		return nil, fmt.Errorf("invalid username or password")
+	user, err := r.Services.UserService.AuthenticateUser(username, password)
+	if err != nil {
+		return nil, err
 	}
 
-	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
-		return nil, fmt.Errorf("invalid username or password")
-	}
-
-	return &user, nil
+	utils.SetSession(ctx, user.ID.String())
+	return user, nil
 }
+
 
 // Logout is the resolver for the logout field.
 func (r *mutationResolver) Logout(ctx context.Context) (bool, error) {
 	return true, nil
 }
 
-// GetUserByID is the resolver for the getUserById field.
 func (r *queryResolver) GetUserByID(ctx context.Context, id string) (*models.User, error) {
-	var user models.User
-
-	if err := r.DB.First(&user, "id = ?", id).Error; err != nil {
-		return nil, fmt.Errorf("user not found")
+	user, err := r.Services.UserService.GetUserByID(id)
+	if err != nil {
+		return nil, err
 	}
-
-	return &user, nil
+	return user, nil
 }
+
 
 // ID is the resolver for the id field.
 func (r *userResolver) ID(ctx context.Context, obj *models.User) (string, error) {
 	return obj.ID.String(), nil
 }
 
-// Notes is the resolver for the notes field.
 func (r *userResolver) Notes(ctx context.Context, obj *models.User) ([]*models.Note, error) {
-	var notes []*models.Note
-	fmt.Println("Fetching notes for user:", obj.ID)
 
-	if err := r.DB.Where("user_id = ?", obj.ID).Find(&notes).Error; err != nil {
-		return nil, fmt.Errorf("failed to fetch notes: %v", err)
+	notes, err := r.Services.UserService.GetUserNotes(obj.ID.String())
+	if err != nil {
+		return nil, err
 	}
-
 	return notes, nil
 }
+
 
 // User returns graphql1.UserResolver implementation.
 func (r *Resolver) User() graphql1.UserResolver { return &userResolver{r} }

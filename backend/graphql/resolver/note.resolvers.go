@@ -9,57 +9,56 @@ import (
 	"fmt"
 	graphql1 "notes/backend/graphql"
 	"notes/backend/models"
+	"notes/backend/utils"
 
 	"github.com/google/uuid"
 )
 
 // AddNote is the resolver for the addNote field.
 func (r *mutationResolver) AddNote(ctx context.Context, title string, body string, userID string) (*models.Note, error) {
+	isAuth, err := utils.IsAuthenticated(ctx)
+	if err != nil || !isAuth {
+        return nil, err
+    }
+
 	parsedUserID, err := uuid.Parse(userID)
 	if err != nil {
 		return nil, fmt.Errorf("invalid user ID: %w", err)
 	}
-	note := &models.Note{
-		Title:  title,
-		Body:   body,
-		UserID: parsedUserID,
+	note, err := r.Services.NoteService.AddNote(title, body, parsedUserID)
+	if err != nil {
+		return nil, err
 	}
-
-	if err := r.DB.Create(note).Error; err != nil {
-		return nil, fmt.Errorf("failed to add note: %w", err)
-	}
-
 	return note, nil
 }
 
 // UpdateNote is the resolver for the updateNote field.
 func (r *mutationResolver) UpdateNote(ctx context.Context, id string, title *string, body *string) (*models.Note, error) {
-	note := &models.Note{}
-	if err := r.DB.First(note, "id = ?", id).Error; err != nil {
-		return nil, fmt.Errorf("note not found: %w", err)
+	isAuth, err := utils.IsAuthenticated(ctx)
+	if err != nil || !isAuth {
+        return nil, err
+    }
+	
+	note, err := r.Services.NoteService.UpdateNote(id, title, body)
+	if err != nil {
+		return nil, err
 	}
-
-	if title != nil {
-		note.Title = *title
-	}
-	if body != nil {
-		note.Body = *body
-	}
-
-	if err := r.DB.Save(note).Error; err != nil {
-		return nil, fmt.Errorf("failed to update note: %w", err)
-	}
-
+	
 	return note, nil
 }
 
-// DeleteNote is the resolver for the deleteNote field.
-func (r *mutationResolver) DeleteNote(ctx context.Context, id string) (string, error) {
-	if err := r.DB.Delete(&models.Note{}, id).Error; err != nil {
-		return "", fmt.Errorf("failed to delete note: %w", err)
-	}
 
-	return "Note deleted successfully", nil
+func (r *mutationResolver) DeleteNote(ctx context.Context, id string) (string, error) {
+	isAuth, err := utils.IsAuthenticated(ctx)
+	if err != nil || !isAuth {
+        return id, err
+    }
+	
+	_, err = r.Services.NoteService.DeleteNote(id)
+	if err != nil {
+		return id, err
+	}
+	return "Note deleted successfully " + id, nil
 }
 
 // ID is the resolver for the id field.
@@ -69,30 +68,29 @@ func (r *noteResolver) ID(ctx context.Context, obj *models.Note) (string, error)
 
 // User is the resolver for the user field.
 func (r *noteResolver) User(ctx context.Context, obj *models.Note) (*models.User, error) {
-	var user models.User
-	if err := r.DB.First(&user, "id = ?", obj.UserID).Error; err != nil {
-		return nil, fmt.Errorf("user not found: %w", err)
+	user, err := r.Services.NoteService.GetUserByIDNote(obj.UserID.String())
+	if err != nil {
+		return nil, err
 	}
-	return &user, nil
+	return user, nil
 }
+
 
 // GetNotes is the resolver for the getNotes field.
 func (r *queryResolver) GetNotes(ctx context.Context) ([]*models.Note, error) {
-	var notes []*models.Note
-	if err := r.DB.Find(&notes).Error; err != nil {
-		return nil, fmt.Errorf("failed to get notes: %w", err)
+	notes, err := r.Services.NoteService.GetNotes()
+	if err != nil {
+		return nil, err
 	}
-
 	return notes, nil
 }
 
 // GetNoteByID is the resolver for the getNoteById field.
 func (r *queryResolver) GetNoteByID(ctx context.Context, id string) (*models.Note, error) {
-	note := &models.Note{}
-	if err := r.DB.First(note, "id = ?", id).Error; err != nil {
-		return nil, fmt.Errorf("note not found: %w", err)
+	note, err := r.Services.NoteService.GetNoteByID(id)
+	if err != nil {
+		return nil, err
 	}
-
 	return note, nil
 }
 

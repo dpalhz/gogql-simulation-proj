@@ -9,16 +9,6 @@ model:
   filename: backend/graphql/model/models_gen.go
   package: model
 
-# resolver:
-#   layout: follow-schema
-#   dir: backend/graphql/resolver
-#   package: resolver
-#   filename_template: "{name}.resolvers.go"
-
-# resolver:
-#   filename: backend/graphql/resolver/resolver.go
-#   package: resolver
-
 resolver:
   layout: follow-schema
   dir: backend/graphql/resolver
@@ -41,6 +31,6 @@ models:
   Note:
     model:
       - ./backend/models.Note
-    # fields:
-    #   user:
-    #     resolver: true
+    fields:
+      user:
+        resolver: true
